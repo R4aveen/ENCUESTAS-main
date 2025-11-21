@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Email{% endblock %}
+{% block content %}
+<style>.errorlist{color:red;} label{display:none}</style>
+<main>
+  <div>
+    <form action="" method="post">
+      {% csrf_token %}
+      <h3>Email</h3>
+      {{ form.as_p }}
+      <div>
+        <p><input type="submit" value="Actualizar"></p>
+        <a href="{% url 'check_profile' %}">Volver</a>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock %}

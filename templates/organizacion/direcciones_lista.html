@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Direcciones</h2>
+
+<form method="get" class="ajax-search" data-target="#lista-direcciones" style="margin-bottom: 10px;">
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar dirección">
+  <button type="submit">Buscar</button>
+  <a class="btn secondary" href="{% url 'organizacion:direccion_crear' %}">+ Nueva</a>
+</form>
+
+<div id="lista-direcciones">
+{% if direcciones %}
+<table border="1" cellspacing="0" cellpadding="5">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Encargado</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in direcciones %}
+    <tr>
+      <td>{{ d.id }}</td>
+      <td>{{ d.nombre_direccion }}</td>
+      <td>
+        {% if d.encargado %}
+          {{ d.encargado.user.get_full_name|default:d.encargado.user.username }}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        {% if d.estado %}
+          Activo
+        {% else %}
+          Bloqueado
+        {% endif %}
+      </td>
+      <td>
+        <a href="{% url 'organizacion:direccion_detalle' d.id %}">Ver</a>
+        <a href="{% url 'organizacion:direccion_editar' d.id %}">Editar</a> |
+        <a href="{% url 'organizacion:direccion_eliminar' d.id %}">Eliminar</a> |
+        <form action="{% url 'organizacion:direccion_toggle_estado' d.id %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">
+            {% if d.estado %}Bloquear{% else %}Activar{% endif %}
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No hay direcciones registradas.</p>
+{% endif %}
+</div>
+{% endblock %}

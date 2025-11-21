@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load auth_extras %}
+
+{% block title %}Panel Territorial - Incidencias{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Panel Territorial</h1>
+  <p>Bienvenido. Aquí puedes monitorear el trabajo en terreno y coordinar con jefes de cuadrilla.</p>
+
+  <hr>
+  <h3>Gestión de Incidencias</h3>
+
+  <!-- Filtros y busqueda -->
+  <form method="get" class="mb-3 d-flex gap-2 align-items-center">
+    <input type="text" name="q" placeholder="Buscar por título" value="{{ q }}" class="form-control" style="max-width:320px;">
+
+    <select name="estado" class="form-select" style="max-width:220px;" onchange="this.form.submit()">
+      <option value="">-- Todos los estados --</option>
+      <option value="pendiente"   {% if estado_seleccionado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+      <option value="en_proceso"  {% if estado_seleccionado == 'en_proceso' %}selected{% endif %}>En proceso</option>
+      <option value="finalizada"  {% if estado_seleccionado == 'finalizada' %}selected{% endif %}>Finalizada</option>
+      <option value="validada"    {% if estado_seleccionado == 'validada' %}selected{% endif %}>Validada</option>
+      <option value="rechazada"   {% if estado_seleccionado == 'rechazada' %}selected{% endif %}>Rechazada</option>
+    </select>
+
+    <!-- Filtro por departamento -->
+    <select name="departamento" class="form-select" style="max-width:220px;" onchange="this.form.submit()">
+      <option value="">-- Todos los departamentos --</option>
+      {% for depto in departamentos %}
+        <option value="{{ depto.id }}" {% if departamento_seleccionado == depto.id|stringformat:"s" %}selected{% endif %}>
+          {{ depto.nombre_departamento }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="btn btn-primary">Buscar</button>
+    <a href="{% url 'incidencias:incidencia_crear' %}" class="btn btn-success ms-2">➕ Nueva Incidencia</a>
+  </form>
+
+  <p class="text-muted" style="margin-top:-6px;">
+    Mostrando {{ incidencias|length }} incidencia{% if incidencias|length != 1 %}s{% endif %}
+    {% if q %} con búsqueda "<strong>{{ q }}</strong>"{% endif %}
+    {% if estado_seleccionado %} y estado <strong>{{ estado_seleccionado }}</strong>{% endif %}
+    {% if departamento_seleccionado %} en el departamento <strong>{{ departamento_nombre }}</strong>{% endif %}.
+  </p>
+
+  <!-- Tabla de incidencias -->
+  <table class="table table-striped align-middle mt-3">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Estado</th>
+        <th>Prioridad</th>
+        <th>Departamento</th>
+        <th>Cuadrilla</th>
+        <th>Fecha de cierre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for incidencia in incidencias %}
+        <tr>
+          <td>{{ incidencia.id }}</td>
+          <td>{{ incidencia.titulo }}</td>
+          <td>
+            {% if incidencia.estado == 'pendiente' %}
+              <span class="badge bg-secondary">Pendiente</span>
+            {% elif incidencia.estado == 'en_proceso' %}
+              <span class="badge bg-warning text-dark">En proceso</span>
+            {% elif incidencia.estado == 'finalizada' %}
+              <span class="badge bg-success">Finalizada</span>
+            {% elif incidencia.estado == 'validada' %}
+              <span class="badge bg-info">Validada</span>
+            {% elif incidencia.estado == 'rechazada' %}
+              <span class="badge bg-danger">Rechazada</span>
+            {% else %}
+              {{ incidencia.estado }}
+            {% endif %}
+          </td>
+          <td>{{ incidencia.prioridad }}</td>
+          <td>{{ incidencia.departamento.nombre_departamento }}</td>
+          <td>
+            {% if incidencia.cuadrilla %}
+              {{ incidencia.cuadrilla.nombre_cuadrilla }}
+            {% else %}
+              Sin asignar
+            {% endif %}
+          </td>
+          <td>
+            {% if incidencia.fecha_cierre %}
+              {{ incidencia.fecha_cierre|date:"d/m/Y H:i" }}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          <td class="d-flex gap-2">
+            <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-primary">👁️ Ver</a>
+            {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' %}
+              {% if user.is_superuser %}
+                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
+              {% elif 'Administrador' in user.groups.values_list.name %}
+                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
+              {% elif 'Jefe de Cuadrilla' in user.groups.values_list.name %}
+                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
+              {% endif %}
+            {% endif %}
+            {% if incidencia.estado == 'en_proceso' and incidencia.cuadrilla %}
+              {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" %}
+                <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn btn-sm btn-success">📤 Subir evidencia</a>
+              {% endif %}
+              
+              <!-- Botón finalizar si ya tiene evidencias -->
+              {% if incidencia.multimedias.exists %}
+                {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" %}
+                  <a href="{% url 'incidencias:finalizar_incidencia' incidencia.id %}" class="btn btn-sm btn-primary" onclick="return confirm('¿Finalizar esta incidencia?')">✅ Finalizar</a>
+                {% endif %}
+              {% endif %}
+            {% endif %}
+            {% if 'Territorial' in user.groups.values_list.name %}
+              {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' %}
+                <a href="{% url 'territorial_app:validar_incidencia' incidencia.id %}" class="btn btn-sm btn-success">✅ Validar</a>
+                <a href="{% url 'territorial_app:rechazar_incidencia' incidencia.id %}" class="btn btn-sm btn-danger">❌ Rechazar</a>
+                <a href="{% url 'territorial_app:reasignar_incidencia' incidencia.id %}" class="btn btn-sm btn-warning">🔄 Reasignar</a>
+              {% endif %}
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8">No hay incidencias asignadas.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

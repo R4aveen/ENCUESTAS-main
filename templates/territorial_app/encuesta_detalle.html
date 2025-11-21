@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Encuesta - {{ encuesta.titulo }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>👁️ Detalle de Encuesta</h1>
+  
+  <hr>
+
+  <!-- Información de la encuesta -->
+  <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; max-width: 800px;">
+    <tr>
+      <th style="width: 200px; text-align: left;">ID</th>
+      <td>{{ encuesta.id }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Título</th>
+      <td><strong>{{ encuesta.titulo }}</strong></td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Descripción</th>
+      <td>{{ encuesta.descripcion }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Ubicación</th>
+      <td>{{ encuesta.ubicacion }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Prioridad</th>
+      <td>{{ encuesta.prioridad }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Departamento</th>
+      <td>{{ encuesta.departamento.nombre_departamento }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Dirección</th>
+      <td>{{ encuesta.departamento.direccion.nombre_direccion }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Estado</th>
+      <td>
+        {% if encuesta.estado %}
+          <span style="color: green; font-weight: bold;">✅ Activa</span>
+        {% else %}
+          <span style="color: orange; font-weight: bold;">🔒 Bloqueada</span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Fecha de Creación</th>
+      <td>{{ encuesta.creadoEl|date:"d/m/Y H:i:s" }}</td>
+    </tr>
+    <tr>
+      <th style="text-align: left;">Última Actualización</th>
+      <td>{{ encuesta.actualizadoEl|date:"d/m/Y H:i:s" }}</td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <!-- Acciones disponibles -->
+  <div class="acciones">
+    <h3>Acciones Disponibles</h3>
+    
+    <a href="{% url 'territorial_app:encuesta_editar' encuesta.id %}" style="text-decoration: none;">
+      <button style="background: #ffc107; padding: 10px 15px; border: none; cursor: pointer;">
+        ✏️ Editar Encuesta
+      </button>
+    </a>
+
+    <form method="post" action="{% url 'territorial_app:encuesta_toggle_estado' encuesta.id %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" style="background: {% if encuesta.estado %}#6c757d{% else %}#28a745{% endif %}; color: white; padding: 10px 15px; border: none; cursor: pointer;">
+        {% if encuesta.estado %}
+          🔒 Bloquear Encuesta
+        {% else %}
+          ✅ Activar Encuesta
+        {% endif %}
+      </button>
+    </form>
+
+    <a href="{% url 'territorial_app:encuesta_eliminar' encuesta.id %}" style="text-decoration: none;">
+      <button style="background: #dc3545; color: white; padding: 10px 15px; border: none; cursor: pointer;">
+        🗑️ Eliminar Encuesta
+      </button>
+    </a>
+  </div>
+
+  <hr>
+
+  <!-- Enlaces de navegación -->
+  <div>
+    <a href="{% url 'territorial_app:encuestas_lista' %}">⬅️ Volver al listado</a> |
+    <a href="{% url 'personas:dashboard_territorial' %}">🏠 Ir al Dashboard</a>
+  </div>
+</div>
+{% endblock %}

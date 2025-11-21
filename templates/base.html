@@ -1,0 +1,356 @@
+{% load static %}
+{% load personas_auth_extras %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Encuestas{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root {
+      --bg: #fffffe;
+      --headline: #272343;
+      --text: #2d334a;
+      --btn: #ffd803;
+      --btn-text: #272343;
+      --surface: #e3f6f5;
+      --border: #c8d5d4;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, #f3f8ff 0, #fffffe 35%), radial-gradient(circle at 80% 0%, #f0fbfa 0, #fffffe 30%), var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--headline); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      background: linear-gradient(135deg, #272343, #1d1b33);
+      color: #fff;
+      padding: 14px 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      width: 100%;
+      overflow-x: auto;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .left,
+    nav .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    nav .brand {
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+    .nav-link, nav form button {
+      color: #fff;
+      font-weight: 700;
+      padding: 9px 14px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+    }
+    .nav-link:hover,
+    nav form button:hover { background: rgba(255,255,255,0.12); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    .nav-link.active {
+      background: rgba(255,255,255,0.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 6px 18px rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    nav form { display: inline; margin: 0; }
+    nav form button {
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      cursor: pointer;
+    }
+    .pill {
+      background: var(--surface);
+      color: var(--headline);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+    }
+    main {
+      max-width: 1200px;
+      margin: 28px auto 56px auto;
+      padding: 0 18px 32px;
+    }
+    .page-shell {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px 26px 34px 26px;
+      box-shadow: 0 26px 48px rgba(0,0,0,0.06);
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .page-shell h1 { margin-top: 0; }
+    .section-gap { margin-top: 22px; }
+    h1, h2, h3, h4, h5 {
+      color: var(--headline);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.35rem; }
+    h3 { font-size: 1.1rem; }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+      margin-bottom: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    table th, table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    table th { background: var(--surface); color: var(--headline); }
+    table tr:hover td { background: #f8fffe; }
+    button, .btn {
+      display: inline-block;
+      background: var(--btn);
+      color: var(--btn-text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    button:hover, .btn:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.12); transform: translateY(-1px); }
+    .btn.secondary, button.secondary { background: var(--surface); color: var(--headline); border-color: var(--border); }
+    input[type="text"], input[type="search"], input[type="email"], input[type="number"] {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+    }
+    form input, form select, form textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      margin: 6px 0 12px 0;
+      font-size: 1rem;
+    }
+    form label { font-weight: 600; color: var(--headline); display: block; margin-top: 6px; }
+    .messages { list-style: none; padding: 0; margin: 0 0 16px 0; }
+    .messages li {
+      margin-bottom: 10px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--headline);
+      font-weight: 600;
+    }
+    .messages .error { background: #ffe9e9; color: #8b1e1e; border-color: #f3c2c2; }
+    .messages .success { background: #ecfdf3; color: #14532d; border-color: #bbf7d0; }
+    .messages .warning { background: #fff7e6; color: #92400e; border-color: #fde68a; }
+    footer {
+      text-align: center;
+      padding: 16px;
+      background: var(--surface);
+      color: var(--text);
+      border-top: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      header { position: static; }
+      nav { flex-direction: column; align-items: flex-start; gap: 6px; }
+      nav .right { width: 100%; flex-wrap: wrap; gap: 6px; }
+      nav .brand { padding: 8px 12px; }
+      .nav-link { padding: 8px 10px; font-size: 0.95rem; }
+      main { padding: 0 6px 24px 6px; max-width: 100%; width: 100%; overflow-x: hidden; }
+      .page-shell { padding: 14px; margin: 0 4px; width: 100%; max-width: 100%; }
+      table { display: block; overflow-x: auto; width: 100%; }
+      table th, table td { white-space: nowrap; font-size: 0.9rem; }
+      form input, form select, form textarea { width: 100%; }
+      .back-btn { position: static; display: inline-block; margin-bottom: 10px; }
+    }
+
+    /* Back button */
+    .back-btn {
+      position: absolute;
+      top: -14px;
+      left: 0;
+      background: #fff;
+      color: var(--headline);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 999px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-btn:hover { background: var(--surface); }
+
+    /* Modal visor de imágenes */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-body {
+      background: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .modal-body img { max-width: 100%; max-height: 80vh; display: block; }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="left">
+        <span class="brand">Muni · Incidencias</span>
+        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Inicio</a>
+      </div>
+      <div class="right">
+        {% if user.is_authenticated %}
+          <span class="pill">Hola, {{ user.username }}</span>
+          <a class="nav-link {% if request.path|startswith:'/personas/dashboard' or request.path|startswith:'/personas/check_profile' %}active{% endif %}" href="{% url 'personas:check_profile' %}">Dashboard</a>
+          {% if user.is_superuser or user|has_group:"Administrador" %}
+            <a class="nav-link {% if request.path|startswith:'/personas/usuarios' or request.path|startswith:'/core/usuarios' %}active{% endif %}" href="{% url 'personas:usuarios_lista' %}">Usuarios</a>
+            <a class="nav-link {% if request.path|startswith:'/organizacion/departamento' %}active{% endif %}" href="{% url 'organizacion:departamentos_lista' %}">Departamentos</a>
+            <a class="nav-link {% if request.path|startswith:'/organizacion/direccion' %}active{% endif %}" href="{% url 'organizacion:direcciones_lista' %}">Direcciones</a>
+          {% endif %}
+          {% if user|has_group:"Departamento" %}
+            <a class="nav-link {% if request.path|startswith:'/personas/dashboard/departamento' %}active{% endif %}" href="{% url 'personas:dashboard_departamento' %}">Depto</a>
+          {% endif %}
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Salir</button>
+          </form>
+        {% else %}
+          <a class="nav-link {% if request.path|startswith:'/accounts/login' or request.path|startswith:'/login' %}active{% endif %}" href="{% url 'login' %}">Iniciar sesión</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  <main style="flex: 1;">
+    <div class="page-shell">
+      {% if not request.path|startswith:'/accounts' and not request.path|startswith:'/personas/dashboard' %}
+        <a class="back-btn" href="javascript:history.back()">← Volver</a>
+      {% endif %}
+      {% if messages %}
+        <ul class="messages">
+          {% for m in messages %}
+            <li class="{{ m.tags }}">{{ m }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% block content %}
+      {% endblock %}
+    </div>
+  </main>
+  <footer>
+    <small>Municipalidad · Gestión de Incidencias & Encuestas</small>
+  </footer>
+
+  <div class="modal-overlay" id="img-modal">
+    <div class="modal-body">
+      <img id="img-modal-src" src="" alt="Imagen">
+    </div>
+  </div>
+
+  <script>
+    // Modal para imágenes ampliadas
+    (function() {
+      const overlay = document.getElementById('img-modal');
+      const imgEl = document.getElementById('img-modal-src');
+      if (overlay && imgEl) {
+        document.addEventListener('click', (e) => {
+          const t = e.target;
+          if (t && t.matches('img[data-modal="true"]')) {
+            imgEl.src = t.src;
+            overlay.classList.add('open');
+          }
+          if (t === overlay) {
+            overlay.classList.remove('open');
+            imgEl.src = '';
+          }
+        });
+      }
+    })();
+
+    // Búsquedas asíncronas genéricas
+    (function() {
+      const attachAjax = (form) => {
+        const targetSelector = form.dataset.target;
+        const target = targetSelector ? document.querySelector(targetSelector) : null;
+        if (!target) return;
+        const submitFetch = () => {
+          const params = new URLSearchParams(new FormData(form)).toString();
+          const url = form.action + (form.action.includes('?') ? '&' : '?') + params;
+          fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              const fresh = doc.querySelector(targetSelector);
+              if (fresh) target.innerHTML = fresh.innerHTML;
+            })
+            .catch(() => {});
+        };
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          submitFetch();
+        });
+        const inputs = form.querySelectorAll('input[type="search"], input[type="text"]');
+        inputs.forEach(inp => {
+          inp.addEventListener('input', () => submitFetch());
+        });
+      };
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('form.ajax-search').forEach(attachAjax);
+      });
+    })();
+  </script>
+</body>
+</html>

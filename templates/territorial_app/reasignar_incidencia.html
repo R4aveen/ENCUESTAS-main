@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Reasignar Incidencia{% endblock %}
+
+{% block content %}
+<h2>Reasignar incidencia: {{ incidencia.titulo }}</h2>
+
+<form method="post" style="max-width: 500px;">
+    {% csrf_token %}
+    <div>
+        {{ form.departamento.label_tag }}<br>
+        {{ form.departamento }}
+        {{ form.departamento.errors }}
+    </div>
+    <div>
+        {{ form.cuadrilla.label_tag }}<br>
+        {{ form.cuadrilla }}
+        {{ form.cuadrilla.errors }}
+    </div>
+    <br>
+    <button type="submit" style="padding: 5px 10px;">Reasignar</button>
+    <a href="{% url 'incidencias:incidencias_lista' %}" style="margin-left: 10px;">Cancelar</a>
+</form>
+{% endblock %}

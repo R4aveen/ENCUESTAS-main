@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container">
+    <h1>Panel de Dirección</h1>
+    <p>Bienvenido. Aquí puedes revisar reportes generales, supervisar departamentos y coordinar estrategias.</p>
+
+    <hr>
+
+    <h3>Gestión de Direcciones</h3>
+    <p>Desde aquí puedes administrar las direcciones registradas en el sistema.</p>
+
+    <div class="acciones">
+      <a href="{% url 'organizacion:direcciones_lista' %}" class="btn btn-primary">📋 Ver todas las Direcciones</a>
+      <a href="{% url 'organizacion:direccion_crear' %}" class="btn btn-success">➕ Nueva Dirección</a>
+    </div>
+
+    <br>
+  </div>
+{% endblock %}

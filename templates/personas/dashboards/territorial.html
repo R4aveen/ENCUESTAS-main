@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>Panel Territorial</h1>
+  <p>Bienvenido, {{ user.first_name }} {{ user.last_name }}. Aquí puedes gestionar encuestas e incidencias.</p>
+
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <hr>
+
+  <!-- SECCIÓN DE ENCUESTAS -->
+  <h3>Gestión de Encuestas</h3>
+  <p>Accede al CRUD completo de encuestas:</p>
+
+  <div class="acciones mb-3">
+    <a href="{% url 'territorial_app:encuestas_lista' %}" class="btn btn-primary">📋 Ver todas las Encuestas</a>
+    <a href="{% url 'territorial_app:encuesta_crear' %}" class="btn btn-success ms-2">➕ Crear Encuesta</a>
+  </div>
+
+  <hr>
+
+  <!-- SECCIÓN DE INCIDENCIAS -->
+  <h3>Gestión de Incidencias</h3>
+  <p>Accede a las incidencias para crearlas, editarlas, validarlas, rechazarlas o reasignarlas:</p>
+
+  <div class="acciones mb-3">
+    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">📋 Ver todas las Incidencias</a>
+    <a href="{% url 'incidencias:incidencia_crear' %}" class="btn btn-success ms-2">➕ Crear Incidencia</a>
+  </div>
+
+  <!-- Resumen de Incidencias -->
+  {% if incidencias %}
+  <h4>Últimas Incidencias</h4>
+  <table class="table mt-3">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for incidencia in incidencias %}
+      <tr>
+        <td>{{ incidencia.id }}</td>
+        <td>{{ incidencia.titulo }}</td>
+        <td>{{ incidencia.estado }}</td>
+        <td>
+          <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-info">👁️ Ver</a>
+          <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-warning">✏️ Editar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No hay incidencias recientes.</p>
+  {% endif %}
+
+  <hr>
+  
+  <div class="mt-4">
+    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+  </div>
+</div>
+{% endblock %}

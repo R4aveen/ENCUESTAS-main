@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Departamentos</h2>
+
+<form method="get" class="ajax-search" data-target="#lista-departamentos" style="margin-bottom: 10px;">
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar departamento">
+  <button type="submit">Buscar</button>
+  <a class="btn secondary" href="{% url 'organizacion:departamento_crear' %}">+ Nuevo</a>
+</form>
+
+<div id="lista-departamentos">
+{% if departamentos %}
+<table border="1" cellspacing="0" cellpadding="5">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Dirección</th>
+      <th>Encargado</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in departamentos %}
+    <tr>
+      <td>{{ d.id }}</td>
+      <td>{{ d.nombre_departamento }}</td>
+      <td>
+        {% if d.direccion %}
+          {{ d.direccion.nombre_direccion }}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        {% if d.encargado %}
+          {{ d.encargado.user.get_full_name|default:d.encargado.user.username }}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        {% if d.estado %}
+          Activo
+        {% else %}
+          Bloqueado
+        {% endif %}
+      </td>
+      <td>
+        <a href="{% url 'organizacion:departamento_detalle' d.id %}">Ver</a>
+        <a href="{% url 'organizacion:departamento_editar' d.id %}">Editar</a> |
+        <a href="{% url 'organizacion:departamento_eliminar' d.id %}">Eliminar</a> |
+        <form action="{% url 'organizacion:departamento_toggle_estado' d.id %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit">
+            {% if d.estado %}Bloquear{% else %}Activar{% endif %}
+          </button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No hay departamentos registrados.</p>
+{% endif %}
+</div>
+{% endblock %}

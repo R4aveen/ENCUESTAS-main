@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+    <h1>{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Tipo de Incidencia</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <table border="0" cellpadding="6" cellspacing="0">
+        {% for field in form %}
+            <tr>
+                <td valign="top"><label for="{{ field.id_for_label }}">{{ field.label }}</label></td>
+                <td>
+                    {{ field }}
+                    {% if field.help_text %}<div style="font-size:12px; color:#666;">{{ field.help_text }}</div>{% endif %}
+                    {% if field.errors %}<div style="color:#c00;">{{ field.errors.0 }}</div>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+
+        <p>
+            <button type="submit" style="background:#ffc107;color:#111;border:none;padding:8px 12px;border-radius:4px;font-weight:600;">✎ Guardar</button>
+            &nbsp;|&nbsp;
+            <a href="{% url 'incidencias:tipo_lista' %}"
+               style="background:#6c757d;color:#fff;padding:8px 12px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600;">Cancelar</a>
+        </p>
+    </form>
+</div>
+
+{% endblock %}

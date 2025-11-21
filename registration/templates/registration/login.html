@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div style="max-width:400px;margin:auto;">
+    <h4>Ingrese sus datos</h4>
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li style="color:red">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label>Usuario:</label>
+            <input type="text" name="username" required />
+        </div>
+        <div>
+            <label>Contraseña:</label>
+            <input type="password" name="password" required />
+        </div>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+    <p><a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a></p>
+</div>
+{% endblock %}

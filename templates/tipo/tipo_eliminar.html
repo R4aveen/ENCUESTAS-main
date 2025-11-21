@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <tr>
+    <h1>Confirmar eliminación</h1>
+
+    <p>¿Está seguro que desea eliminar este tipo de incidencia? Esta acción no se puede deshacer.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <p>
+            <button type="submit" style="background:#dc3545;color:#fff;border:none;padding:8px 12px;border-radius:4px;font-weight:600;">Eliminar</button>
+            &nbsp;|&nbsp;
+            <a href="{% url 'incidencias:tipo_lista' %}"
+               style="background:#6c757d;color:#fff;padding:8px 12px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600;">Cancelar</a>
+        </p>
+    </form>
+    </tr>
+</div>
+
+{% endblock %}

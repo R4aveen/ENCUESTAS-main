@@ -1,0 +1,59 @@
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# ======================
+# Entornos virtuales
+# ======================
+*.env
+*.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+encuestas_env/
+
+# ======================
+# Archivos del sistema
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Archivos de Django
+# ======================
+*.log
+*.pot
+db.sqlite3
+media/
+staticfiles/
+
+# ======================
+# Archivos de configuración
+# ======================
+.env
+.env.*
+*.secret
+*.config
+settings_local.py
+
+# ======================
+# IDEs y editores
+# ======================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ======================
+# Compilados y temporales
+# ======================
+*.bak
+*.tmp
+*.orig

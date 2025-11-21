@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Panel Jefe de Cuadrilla</h1>
+  <p>Bienvenido, <strong>{{ user.first_name }} {{ user.last_name }}</strong>. Aquí puedes organizar tus cuadrillas y gestionar incidencias.</p>
+
+  {% if messages %}
+    <div class="messages mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <hr>
+
+  {% if cuadrillas %}
+  <h3>👷 Mis Cuadrillas ({{ cuadrillas.count }})</h3>
+  <div class="row mb-4">
+    {% for cuadrilla in cuadrillas %}
+      <div class="col-md-6 mb-3">
+        <div class="card">
+          <div class="card-body">
+            <h5>{{ cuadrilla.nombre_cuadrilla }}</h5>
+            <p><strong>Departamento:</strong> {{ cuadrilla.departamento.nombre_departamento|default:"No asignado" }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <hr>
+
+  <h3>📋 Incidencias Pendientes ({{ incidencias_pendientes.count }})</h3>
+  {% if incidencias_pendientes %}
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Prioridad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for incidencia in incidencias_pendientes %}
+      <tr>
+        <td>{{ incidencia.id }}</td>
+        <td>{{ incidencia.titulo }}</td>
+        <td>{{ incidencia.prioridad }}</td>
+        <td>
+          <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-primary">Ver</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No hay incidencias pendientes.</p>
+  {% endif %}
+
+  <hr>
+
+  <h3>🔧 Incidencias En Proceso ({{ incidencias_en_proceso.count }})</h3>
+  {% if incidencias_en_proceso %}
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Prioridad</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for incidencia in incidencias_en_proceso %}
+      <tr>
+        <td>{{ incidencia.id }}</td>
+        <td>{{ incidencia.titulo }}</td>
+        <td>{{ incidencia.prioridad }}</td>
+        <td>
+          <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-primary">Ver</a>
+          <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn btn-sm btn-success">📤 Subir evidencia</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No hay incidencias en proceso.</p>
+  {% endif %}
+
+  <hr>
+
+  <div class="mt-4">
+    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">📋 Ver todas las Incidencias</a>
+    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+  </div>
+</div>
+{% endblock %}

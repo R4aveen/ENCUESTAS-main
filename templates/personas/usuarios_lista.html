@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load auth_extras %} {# si usas el filtro has_group #}
+{% block content %}
+<h2>Usuarios</h2>
+
+<form method="get" class="ajax-search" data-target="#lista-usuarios" style="margin-bottom:10px">
+  <input type="search" name="q" value="{{ q }}" placeholder="Buscar usuario, nombre o correo">
+  <button type="submit">Buscar</button>
+  <a class="btn secondary" href="{% url 'core:usuario_crear' %}">+ Nuevo</a>
+</form>
+
+<div id="lista-usuarios">
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Usuario</th>
+      <th>Perfil</th>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>Email</th>
+      <th>Teléfono</th>
+      <th>Activo</th>
+      <th>Acciones</th>
+
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in usuarios %}
+      <tr>
+        <td>{{ u.id }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.groups.first.name|default:"-" }}</td>
+        <td>{{ u.first_name }}</td>
+        <td>{{ u.last_name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.profile.telefono|default:"-" }}</td>
+        <td>{{ u.is_active|yesno:"Sí,No" }}</td>
+        <td>
+          <a href="{% url 'core:usuario_detalle' u.id %}">Ver</a>
+          {% if request.user.is_superuser or request.user|has_group:"Administrador" %}
+            | <a href="{% url 'core:usuario_editar' u.id %}">Editar</a>
+            | <a href="{% url 'personas:usuario_eliminar' u.id %}">Eliminar</a>
+            | {% if u.is_active %}
+                <form action="{% url 'core:usuario_toggle_activo' u.id %}" method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit">Desactivar</button>
+                </form>
+              {% else %}
+                <form action="{% url 'core:usuario_toggle_activo' u.id %}" method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit">Activar</button>
+                </form>
+              {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="9">Sin usuarios.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

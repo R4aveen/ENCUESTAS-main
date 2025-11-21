@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Incidencias{% endblock %}
+
+{% block content %}
+<h1>Panel de Incidencias</h1>
+<p>Bienvenido, {{ request.user.username }} | <a href="{% url 'logout' %}">Salir</a></p>
+
+<div class="mt-4">
+  <h2>Acciones</h2>
+  <ul>
+    <li><a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">Ver todas las incidencias</a></li>
+    <li><a href="{% url 'incidencias:incidencia_crear' %}" class="btn btn-success">Crear nueva incidencia</a></li>
+  </ul>
+</div>
+
+<div class="mt-4">
+  <h2>Estadísticas</h2>
+  <ul>
+    <li>Total de incidencias: {{ total_incidencias }}</li>
+    <li>Incidencias abiertas: {{ abiertas }}</li>
+    <li>Incidencias cerradas: {{ cerradas }}</li>
+  </ul>
+</div>
+
+<div class="mt-4">
+  <h2>Acceso rápido por prioridad</h2>
+  <ul>
+    <li><a href="{% url 'incidencias:incidencias_lista' %}?prioridad=Alta" class="btn btn-danger">Alta</a></li>
+    <li><a href="{% url 'incidencias:incidencias_lista' %}?prioridad=Media" class="btn btn-warning">Media</a></li>
+    <li><a href="{% url 'incidencias:incidencias_lista' %}?prioridad=Baja" class="btn btn-info">Baja</a></li>
+  </ul>
+</div>
+{% endblock %}

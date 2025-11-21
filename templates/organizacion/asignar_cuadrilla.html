@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Asignar Cuadrilla a Incidencia</h2>
+    
+    <!-- Información de la incidencia -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5>Incidencia #{{ incidencia.id }} - {{ incidencia.titulo }}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Descripción:</strong> {{ incidencia.descripcion }}</p>
+            <p><strong>Prioridad:</strong> <span class="badge bg-{{ incidencia.prioridad }}">{{ incidencia.prioridad }}</span></p>
+            <p><strong>Departamento:</strong> {{ incidencia.departamento }}</p>
+            <p><strong>Estado actual:</strong> <span class="badge bg-warning">{{ incidencia.estado|capfirst }}</span></p>
+            <p><strong>Vecino:</strong> {{ incidencia.nombre_vecino }} ({{ incidencia.correo_vecino }})</p>
+        </div>
+    </div>
+    
+    <!-- Formulario de asignación -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Seleccionar Cuadrilla</h5>
+        </div>
+        <div class="card-body">
+            {% if cuadrillas %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="cuadrilla_id" class="form-label">Cuadrilla:</label>
+                        <select name="cuadrilla_id" id="cuadrilla_id" class="form-select" required>
+                            <option value="">-- Seleccionar cuadrilla --</option>
+                            {% for cuadrilla in cuadrillas %}
+                                <option value="{{ cuadrilla.id }}">
+                                    {{ cuadrilla.nombre_cuadrilla }} 
+                                    (Usuario: {{ cuadrilla.usuario }}, Encargado: {{ cuadrilla.encargado }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>ℹ️ Nota:</strong> Al asignar una cuadrilla, la incidencia pasará automáticamente al estado "En proceso".
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">✅ Asignar y poner en proceso</button>
+                    <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            {% else %}
+                <div class="alert alert-warning">
+                    <strong>⚠️ No hay cuadrillas disponibles</strong>
+                    <p>No hay cuadrillas asignadas a este departamento. Por favor, crea cuadrillas primero.</p>
+                </div>
+                <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary">⬅️ Volver</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

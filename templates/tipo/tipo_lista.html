@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+    <h1>Tipos de Incidencia</h1>
+
+    <p>
+        <a href="{% url 'incidencias:tipo_crear' %}">Crear nuevo tipo</a>
+        &nbsp;|&nbsp;
+        <a href="{% url 'personas:dashboard_admin' %}">Volver al dashboard</a>
+    </p>
+
+    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th width="60">#</th>
+                <th>Nombre</th>
+                <th width="160">Gravedad</th>
+                <th width="220">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for tipo in tipos %}
+            <tr>
+                <td align="center">{{ tipo.pk }}</td>
+                <td>
+                    <div>{{ tipo.nombre_problema }}</div>
+                    <div style="font-size:12px; color:#666;">ID {{ tipo.pk }}</div>
+                </td>
+                <td>{{ tipo.get_tipo_gravedad_display }}</td>
+                <td>
+                    <a href="{% url 'incidencias:tipo_editar' tipo.pk %}"
+                       style="background:#ffc107;color:#111;padding:6px 10px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600;">✎ Editar</a>
+                    &nbsp;
+                    <a href="{% url 'incidencias:tipo_eliminar' tipo.pk %}"
+                       style="background:#dc3545;color:#fff;padding:6px 10px;border-radius:4px;text-decoration:none;display:inline-block;font-weight:600;">🗑 Eliminar</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4" align="center">No hay tipos definidos.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

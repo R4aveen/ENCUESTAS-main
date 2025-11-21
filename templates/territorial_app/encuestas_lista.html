@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Encuestas{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Gestión de Encuestas</h1>
+  <p>Aquí puedes ver, crear, editar y gestionar todas las encuestas del sistema.</p>
+
+  <hr>
+
+  <!-- Acciones principales -->
+  <div class="acciones">
+    <a href="{% url 'territorial_app:encuesta_crear' %}">➕ Crear Nueva Encuesta</a>
+    <a href="{% url 'personas:dashboard_territorial' %}">⬅️ Volver al Dashboard</a>
+  </div>
+
+  <hr>
+
+  <!-- Filtros de búsqueda -->
+  <form method="get" action="{% url 'territorial_app:encuestas_lista' %}">
+    <fieldset>
+      <legend>Filtros de búsqueda</legend>
+      
+      <label for="q">Buscar:</label>
+      <input type="text" name="q" id="q" value="{{ q }}" placeholder="Título, descripción o departamento">
+      
+      <label for="estado">Estado:</label>
+      <select name="estado" id="estado">
+        <option value="">Todos</option>
+        <option value="activo" {% if estado_seleccionado == 'activo' %}selected{% endif %}>Activas</option>
+        <option value="inactivo" {% if estado_seleccionado == 'inactivo' %}selected{% endif %}>Bloqueadas</option>
+      </select>
+      
+      <button type="submit">🔍 Buscar</button>
+      <a href="{% url 'territorial_app:encuestas_lista' %}">🔄 Limpiar filtros</a>
+    </fieldset>
+  </form>
+
+  <hr>
+
+  <!-- Tabla de encuestas -->
+  <h2>Listado de Encuestas ({{ encuestas|length }})</h2>
+
+  {% if encuestas %}
+  <table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Título</th>
+        <th>Departamento</th>
+        <th>Ubicación</th>
+        <th>Prioridad</th>
+        <th>Estado</th>
+        <th>Creado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for encuesta in encuestas %}
+      <tr>
+        <td>{{ encuesta.id }}</td>
+        <td><strong>{{ encuesta.titulo }}</strong></td>
+        <td>{{ encuesta.departamento.nombre_departamento }}</td>
+        <td>{{ encuesta.ubicacion|truncatewords:5 }}</td>
+        <td>{{ encuesta.prioridad }}</td>
+        <td>
+          {% if encuesta.estado %}
+            ✅ Activa
+          {% else %}
+            🔒 Bloqueada
+          {% endif %}
+        </td>
+        <td>{{ encuesta.creadoEl|date:"d/m/Y H:i" }}</td>
+        <td>
+          <a href="{% url 'territorial_app:encuesta_detalle' encuesta.id %}">👁️ Ver</a> |
+          <a href="{% url 'territorial_app:encuesta_editar' encuesta.id %}">✏️ Editar</a> |
+          
+          <form method="post" action="{% url 'territorial_app:encuesta_toggle_estado' encuesta.id %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="border:none; background:none; color:blue; text-decoration:underline; cursor:pointer;">
+              {% if encuesta.estado %}
+                🔒 Bloquear
+              {% else %}
+                ✅ Activar
+              {% endif %}
+            </button>
+          </form> |
+          
+          <a href="{% url 'territorial_app:encuesta_eliminar' encuesta.id %}">🗑️ Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No se encontraron encuestas.</p>
+  {% endif %}
+
+  <hr>
+  <p><a href="{% url 'personas:dashboard_territorial' %}">⬅️ Volver al Dashboard</a></p>
+</div>
+{% endblock %}

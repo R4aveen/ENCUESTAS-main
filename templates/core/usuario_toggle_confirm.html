@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Cambiar estado de usuario</h2>
+
+<p>¿Seguro que deseas {% if obj.is_active %}desactivar{% else %}activar{% endif %} a 
+   <strong>{{ obj.username }}</strong>?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">
+    {% if obj.is_active %}Sí, desactivar{% else %}Sí, activar{% endif %}
+  </button>
+  <a href="{% url 'core:usuarios_lista' %}">No, volver</a>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Administrador{% endblock %}
+
+{% block content %}
+<h1>Panel de Administración</h1>
+<p>Bienvenido, {{ request.user.username }} | <a href="{% url 'logout' %}">Salir</a></p>
+
+<div style="margin-top:20px;">
+  <h2>Usuarios</h2>
+  <ul>
+    <li><a href="{% url 'personas:usuarios_lista' %}">Lista de Usuarios</a></li>
+  </ul>
+</div>
+
+<div style="margin-top:20px;">
+  <h2>Clasificación</h2>
+  <ul>
+    <!-- Categorías eliminado del flujo actual -->
+    <li><a href="{% url 'incidencias:tipo_lista' %}">Tipos</a></li>
+  </ul>
+</div>
+
+<div style="margin-top:20px;">
+  <h2>Otros accesos</h2>
+  <ul>
+    <li><a href="{% url 'personas:dashboard_territorial' %}">Dashboard Territorial</a></li>
+    <li><a href="{% url 'personas:dashboard_jefeCuadrilla' %}">Dashboard Jefe de Cuadrilla</a></li>
+    <li><a href="{% url 'personas:dashboard_direccion' %}">Dashboard Dirección</a></li>
+    <li><a href="{% url 'personas:dashboard_departamento' %}">Dashboard Departamento</a></li>
+  </ul>
+</div>
+
+<div style="margin-top:20px;">
+  <h2>Acciones rápidas</h2>
+  <p>Puedes usar este panel para navegar a las secciones.</p>
+</div>
+{% endblock %}

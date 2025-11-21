@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Rechazar Incidencia{% endblock %}
+
+{% block content %}
+<h2>Rechazar incidencia: {{ incidencia.titulo }}</h2>
+
+<form method="post" style="max-width: 500px;">
+    {% csrf_token %}
+    <div>
+        {{ form.motivo.label_tag }}<br>
+        {{ form.motivo }}
+        {{ form.motivo.errors }}
+    </div>
+    <br>
+    <button type="submit" style="padding: 5px 10px;">Rechazar</button>
+    <a href="{% url 'incidencias:incidencias_lista' %}" style="margin-left: 10px;">Cancelar</a>
+</form>
+{% endblock %}

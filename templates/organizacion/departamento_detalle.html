@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Detalle del Departamento</h2>
+
+<table border="1" cellpadding="8" cellspacing="0">
+  <tr>
+    <th>Nombre del Departamento</th>
+    <td>{{ obj.nombre_departamento }}</td>
+  </tr>
+  <tr>
+    <th>Dirección</th>
+    <td>
+      {% if obj.direccion %}
+        {{ obj.direccion.nombre_direccion }}
+      {% else %}
+        Sin dirección
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <th>Encargado</th>
+    <td>
+      {% if obj.encargado %}
+        {{ obj.encargado.user.get_full_name|default:obj.encargado.user.username }}
+      {% else %}
+        Sin encargado
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <th>Estado</th>
+    <td>{{ obj.estado|yesno:"Activo,Inactivo" }}</td>
+  </tr>
+  <tr>
+    <th>Creado el</th>
+    <td>{{ obj.creadoEl|date:"d/m/Y H:i" }}</td>
+  </tr>
+  <tr>
+    <th>Actualizado el</th>
+    <td>{{ obj.actualizadoEl|date:"d/m/Y H:i" }}</td>
+  </tr>
+</table>
+
+<br>
+<a href="{% url 'organizacion:departamentos_lista' %}">← Volver al listado</a>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if modo == 'crear' %}
+    Crear Encuesta
+  {% else %}
+    Editar Encuesta
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>
+    {% if modo == 'crear' %}
+      ➕ Crear Nueva Encuesta
+    {% else %}
+      ✏️ Editar Encuesta
+    {% endif %}
+  </h1>
+
+  {% if modo == 'editar' and encuesta.estado %}
+    <div style="background-color: #fff3cd; padding: 10px; border: 1px solid #ffc107; margin-bottom: 15px;">
+      ⚠️ <strong>Advertencia:</strong> No se puede editar una encuesta activa. Debes bloquearla primero.
+      <form method="post" action="{% url 'territorial_app:encuesta_toggle_estado' encuesta.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" style="background: #ffc107; border: none; padding: 5px 10px; cursor: pointer;">
+          🔒 Bloquear Encuesta
+        </button>
+      </form>
+    </div>
+  {% endif %}
+
+  <hr>
+
+  <form method="post" action="">
+    {% csrf_token %}
+
+    <fieldset>
+      <legend>Información de la Encuesta</legend>
+
+      <!-- Título -->
+      <div style="margin-bottom: 15px;">
+        <label for="{{ form.titulo.id_for_label }}">{{ form.titulo.label }}:</label>
+        {{ form.titulo }}
+        {% if form.titulo.errors %}
+          <div style="color: red;">{{ form.titulo.errors }}</div>
+        {% endif %}
+        {% if form.titulo.help_text %}
+          <small>{{ form.titulo.help_text }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Descripción -->
+      <div style="margin-bottom: 15px;">
+        <label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}:</label>
+        {{ form.descripcion }}
+        {% if form.descripcion.errors %}
+          <div style="color: red;">{{ form.descripcion.errors }}</div>
+        {% endif %}
+        {% if form.descripcion.help_text %}
+          <small>{{ form.descripcion.help_text }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Ubicación -->
+      <div style="margin-bottom: 15px;">
+        <label for="{{ form.ubicacion.id_for_label }}">{{ form.ubicacion.label }}:</label>
+        {{ form.ubicacion }}
+        {% if form.ubicacion.errors %}
+          <div style="color: red;">{{ form.ubicacion.errors }}</div>
+        {% endif %}
+        {% if form.ubicacion.help_text %}
+          <small>{{ form.ubicacion.help_text }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Prioridad -->
+      <div style="margin-bottom: 15px;">
+        <label for="{{ form.prioridad.id_for_label }}">{{ form.prioridad.label }}:</label>
+        {{ form.prioridad }}
+        {% if form.prioridad.errors %}
+          <div style="color: red;">{{ form.prioridad.errors }}</div>
+        {% endif %}
+        {% if form.prioridad.help_text %}
+          <small>{{ form.prioridad.help_text }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Departamento -->
+      <div style="margin-bottom: 15px;">
+        <label for="{{ form.departamento.id_for_label }}">{{ form.departamento.label }}:</label>
+        {{ form.departamento }}
+        {% if form.departamento.errors %}
+          <div style="color: red;">{{ form.departamento.errors }}</div>
+        {% endif %}
+        {% if form.departamento.help_text %}
+          <small>{{ form.departamento.help_text }}</small>
+        {% endif %}
+      </div>
+
+      <!-- Estado (Activa) -->
+      <div style="margin-bottom: 15px;">
+        {{ form.estado }}
+        <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+        {% if form.estado.errors %}
+          <div style="color: red;">{{ form.estado.errors }}</div>
+        {% endif %}
+        {% if form.estado.help_text %}
+          <small style="display: block;">{{ form.estado.help_text }}</small>
+        {% endif %}
+      </div>
+    </fieldset>
+
+    <hr>
+
+    <!-- Errores generales del formulario -->
+    {% if form.non_field_errors %}
+      <div style="background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; margin-bottom: 15px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <!-- Botones de acción -->
+    <div>
+      <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+        {% if modo == 'crear' %}
+          ✅ Crear Encuesta
+        {% else %}
+          💾 Guardar Cambios
+        {% endif %}
+      </button>
+      <a href="{% url 'territorial_app:encuestas_lista' %}" style="margin-left: 10px;">❌ Cancelar</a>
+    </div>
+  </form>
+
+  <hr>
+  <p><a href="{% url 'territorial_app:encuestas_lista' %}">⬅️ Volver al listado</a></p>
+</div>
+{% endblock %}
