@@ -28,8 +28,6 @@ INSTALLED_APPS = [
     "registration",
     "personas",
     "corsheaders",
-
-    
 ]
 
 MIDDLEWARE = [
