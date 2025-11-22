@@ -17,7 +17,7 @@ class IncidenciaViewSet(viewsets.ModelViewSet):
     serializer_class = IncidenciaSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    queryset = Incidencia.objects.none() # Base queryset, overridden in get_queryset
+    queryset = Incidencia.objects.none() 
 
     def get_queryset(self):
         user = self.request.user
@@ -25,7 +25,6 @@ class IncidenciaViewSet(viewsets.ModelViewSet):
         if not profile:
             return Incidencia.objects.none()
 
-        # Filtrar cuadrillas del usuario
         try:
             cuadrillas = JefeCuadrilla.objects.filter(usuario=profile) | JefeCuadrilla.objects.filter(encargado=profile)
         except Exception:
@@ -36,7 +35,6 @@ class IncidenciaViewSet(viewsets.ModelViewSet):
 
         qs = Incidencia.objects.filter(cuadrilla__in=cuadrillas)
 
-        # Filtrado por estado opcional
         estado = self.request.query_params.get("estado")
         if estado:
             qs = qs.filter(estado=estado)

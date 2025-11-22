@@ -20,6 +20,7 @@ from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
+from . import api_views
 
 urlpatterns = [
     # Raíz: redirige al resolvedor de perfiles (decide dashboard por rol)
@@ -45,7 +46,9 @@ urlpatterns = [
     # Admin de Django
     path("admin/", admin.site.urls),
 
-    # API Auth (token)
+    # API básica para frontend React
+    path("api/health/", api_views.health, name="api_health"),
+    path("api/login/", obtain_auth_token, name="api_login"),
     path("api/auth/token/", obtain_auth_token, name="api_token_auth"),
 ]
 

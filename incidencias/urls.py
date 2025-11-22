@@ -7,13 +7,10 @@ from . import api_views
 app_name = "incidencias"
 
 router = DefaultRouter()
-# API para cuadrilla: /incidencias/api/cuadrilla/incidencias/ y acciones resolver/rechazar
 router.register(r'api/cuadrilla/incidencias', api_views.IncidenciaViewSet, basename='api_cuadrilla_incidencias')
-# Alias general: /incidencias/api/incidencias/ (mismo ViewSet y acciones)
 router.register(r'api/incidencias', api_views.IncidenciaViewSet, basename='api_incidencias')
 
 urlpatterns = [
-    # API endpoints (Router)
     path('', include(router.urls)),
 
     # API endpoints (Legacy/Manual - if any needed, but ViewSet covers them)
