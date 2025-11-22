@@ -1,23 +1,33 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from core.utils import solo_admin
+from django.views.decorators.http import require_POST
+from core.utils import solo_admin, admin_o_direccion, admin_o_departamento
 from core.models import Direccion, Departamento, Incidencia, JefeCuadrilla
 from .forms import DireccionForm, DepartamentoForm
 from django.db.models import Q, Count
 
 # ------------------- CRUD DIRECCIONES -------------------
 @login_required
-@solo_admin
+@admin_o_direccion
 def direcciones_lista(request):
     q = request.GET.get("q", "").strip()
-    qs = Direccion.objects.all().order_by("nombre_direccion")
+    
+    # Si es admin, muestra todas; si es Dirección, solo las que administra
+    if request.user.is_superuser or request.user.groups.filter(name="Administrador").exists():
+        qs = Direccion.objects.all().order_by("nombre_direccion")
+    else:
+        try:
+            qs = Direccion.objects.filter(encargado=request.user.profile).order_by("nombre_direccion")
+        except:
+            qs = Direccion.objects.none()
+    
     if q:
         qs = qs.filter(nombre_direccion__icontains=q)
     return render(request, "organizacion/direcciones_lista.html", {"direcciones": qs, "q": q})
 
 @login_required
-@solo_admin
+@admin_o_direccion
 def direccion_crear(request):
     if request.method == "POST":
         form = DireccionForm(request.POST)
@@ -29,7 +39,7 @@ def direccion_crear(request):
     return render(request, "organizacion/direccion_form.html", {"form": form})
 
 @login_required
-@solo_admin
+@admin_o_direccion
 def direccion_editar(request, pk):
     direccion = get_object_or_404(Direccion, pk=pk)
     if request.method == "POST":
@@ -42,7 +52,7 @@ def direccion_editar(request, pk):
     return render(request, "organizacion/direccion_form.html", {"form": form})
 
 @login_required
-@solo_admin
+@admin_o_direccion
 def direccion_detalle(request, pk):
     direccion = get_object_or_404(Direccion, pk=pk)
     grupo = None
@@ -51,7 +61,7 @@ def direccion_detalle(request, pk):
     return render(request, "organizacion/direccion_detalle.html", {"obj": direccion,"grupo": grupo,})
 
 @login_required
-@solo_admin
+@admin_o_direccion
 def direccion_eliminar(request, pk):
     obj = get_object_or_404(Direccion, pk=pk)
     if request.method == "POST":
@@ -61,7 +71,7 @@ def direccion_eliminar(request, pk):
     return render(request, "organizacion/direccion_eliminar.html", {"obj": obj})
 
 @login_required
-@solo_admin
+@admin_o_direccion
 def direccion_toggle_estado(request, pk):
     direccion = get_object_or_404(Direccion, pk=pk)
     if request.method == "POST":
@@ -141,25 +151,20 @@ def departamento_toggle_estado(request, pk):
     return redirect("organizacion:departamentos_lista")
 
 
-# ------------------- ASIGNACIÓN DE CUADRILLAS -------------------
+# ------------------- FLUJO DE DEPARTAMENTO -------------------
 
 @login_required
-def asignar_cuadrilla_view(request, pk):
+@admin_o_departamento
+def derivar_incidencia_view(request, pk):
     """
-    Vista para asignar una cuadrilla a una incidencia pendiente.
+    Vista para derivar una incidencia pendiente a una cuadrilla.
     Solo usuarios del Departamento pueden acceder.
     """
     incidencia = get_object_or_404(Incidencia, pk=pk)
-    roles = set(request.user.groups.values_list("name", flat=True))
-    
-    # Validar permisos
-    if not ("Departamento" in roles or request.user.is_superuser or "Administrador" in roles):
-        messages.error(request, "No tienes permisos para asignar cuadrillas")
-        return redirect("incidencias:incidencias_lista")
     
     # Validar que esté pendiente
     if incidencia.estado != 'pendiente':
-        messages.warning(request, f"Solo se pueden asignar cuadrillas a incidencias pendientes. Estado actual: {incidencia.estado}")
+        messages.warning(request, f"Solo se pueden derivar incidencias pendientes. Estado actual: {incidencia.estado}")
         return redirect("incidencias:incidencia_detalle", pk=pk)
     
     if request.method == "POST":
@@ -167,7 +172,7 @@ def asignar_cuadrilla_view(request, pk):
         
         if not cuadrilla_id:
             messages.error(request, "Debes seleccionar una cuadrilla")
-            return redirect("organizacion:asignar_cuadrilla", pk=pk)
+            return redirect("organizacion:derivar_incidencia", pk=pk)
         
         try:
             cuadrilla = JefeCuadrilla.objects.get(pk=cuadrilla_id)
@@ -175,17 +180,18 @@ def asignar_cuadrilla_view(request, pk):
             # Asignar cuadrilla y cambiar estado
             incidencia.cuadrilla = cuadrilla
             incidencia.estado = 'en_proceso'
+            incidencia.motivo_rechazo = None  # Limpiar motivo de rechazo si existía
             incidencia.save()
             
             messages.success(
                 request,
-                f"✅ Incidencia asignada a '{cuadrilla.nombre_cuadrilla}' y puesta en proceso."
+                f"✅ Incidencia derivada a '{cuadrilla.nombre_cuadrilla}' y puesta en proceso."
             )
             return redirect("personas:dashboard_departamento")
             
         except JefeCuadrilla.DoesNotExist:
             messages.error(request, "Cuadrilla no encontrada")
-            return redirect("organizacion:asignar_cuadrilla", pk=pk)
+            return redirect("organizacion:derivar_incidencia", pk=pk)
     
     # Obtener cuadrillas disponibles del mismo departamento
     if incidencia.departamento:
@@ -198,4 +204,51 @@ def asignar_cuadrilla_view(request, pk):
         'cuadrillas': cuadrillas,
     }
     
-    return render(request, 'organizacion/asignar_cuadrilla.html', ctx)
+    return render(request, 'organizacion/derivar_incidencia.html', ctx)
+
+
+@login_required
+@admin_o_departamento
+def rechazar_incidencia_view(request, pk):
+    """
+    Vista para rechazar una incidencia pendiente con un motivo.
+    Solo usuarios del Departamento pueden acceder.
+    """
+    incidencia = get_object_or_404(Incidencia, pk=pk)
+    
+    # Validar que esté pendiente
+    if incidencia.estado != 'pendiente':
+        messages.warning(request, f"Solo se pueden rechazar incidencias pendientes. Estado actual: {incidencia.estado}")
+        return redirect("incidencias:incidencia_detalle", pk=pk)
+    
+    if request.method == "POST":
+        motivo = request.POST.get('motivo', '').strip()
+        
+        if not motivo:
+            messages.error(request, "Debes ingresar un motivo de rechazo")
+            return redirect("organizacion:rechazar_incidencia", pk=pk)
+        
+        # Rechazar incidencia
+        incidencia.estado = 'rechazada'
+        incidencia.motivo_rechazo = motivo
+        incidencia.cuadrilla = None  # Limpiar cuadrilla si estaba asignada
+        incidencia.save()
+        
+        messages.success(
+            request,
+            f"❌ Incidencia rechazada. El territorial será notificado."
+        )
+        return redirect("personas:dashboard_departamento")
+    
+    return render(request, 'organizacion/rechazar_incidencia.html', {'incidencia': incidencia})
+
+
+# ------------------- ASIGNACIÓN DE CUADRILLAS (LEGACY) -------------------
+
+@login_required
+def asignar_cuadrilla_view(request, pk):
+    """
+    Vista legada para asignar una cuadrilla a una incidencia pendiente.
+    Redirige a la nueva vista de derivar.
+    """
+    return redirect("organizacion:derivar_incidencia", pk=pk)

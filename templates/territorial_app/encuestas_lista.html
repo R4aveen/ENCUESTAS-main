@@ -73,7 +73,7 @@
         </td>
         <td>{{ encuesta.creadoEl|date:"d/m/Y H:i" }}</td>
         <td>
-          <a href="{% url 'territorial_app:encuesta_detalle' encuesta.id %}">👁️ Ver</a> |
+          <a href="{% url 'territorial_app:encuesta_detalle' encuesta.id %}">Ver</a> |
           <a href="{% url 'territorial_app:encuesta_editar' encuesta.id %}">✏️ Editar</a> |
           
           <form method="post" action="{% url 'territorial_app:encuesta_toggle_estado' encuesta.id %}" style="display:inline;">

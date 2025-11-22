@@ -20,8 +20,8 @@
   <p>Accede al CRUD completo de encuestas:</p>
 
   <div class="acciones mb-3">
-    <a href="{% url 'territorial_app:encuestas_lista' %}" class="btn btn-primary">📋 Ver todas las Encuestas</a>
-    <a href="{% url 'territorial_app:encuesta_crear' %}" class="btn btn-success ms-2">➕ Crear Encuesta</a>
+    <a href="{% url 'territorial_app:encuestas_lista' %}" class="btn btn-primary">Ver todas las Encuestas</a>
+    <a href="{% url 'territorial_app:encuesta_crear' %}" class="btn btn-success ms-2">Crear Encuesta</a>
   </div>
 
   <hr>
@@ -31,8 +31,8 @@
   <p>Accede a las incidencias para crearlas, editarlas, validarlas, rechazarlas o reasignarlas:</p>
 
   <div class="acciones mb-3">
-    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">📋 Ver todas las Incidencias</a>
-    <a href="{% url 'incidencias:incidencia_crear' %}" class="btn btn-success ms-2">➕ Crear Incidencia</a>
+    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">Ver todas las Incidencias</a>
+    <a href="{% url 'incidencias:incidencia_crear' %}" class="btn btn-success ms-2">Crear Incidencia</a>
   </div>
 
   <!-- Resumen de Incidencias -->
@@ -54,8 +54,8 @@
         <td>{{ incidencia.titulo }}</td>
         <td>{{ incidencia.estado }}</td>
         <td>
-          <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-info">👁️ Ver</a>
-          <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-warning">✏️ Editar</a>
+          <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-info">Ver</a>
+          <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}?next={% url 'personas:dashboard_territorial' %}" class="btn btn-sm btn-warning">Editar</a>
         </td>
       </tr>
       {% endfor %}
@@ -68,7 +68,7 @@
   <hr>
   
   <div class="mt-4">
-    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">Cerrar Sesión</a>
   </div>
 </div>
 {% endblock %}

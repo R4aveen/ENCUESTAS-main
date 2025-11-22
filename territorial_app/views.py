@@ -235,12 +235,7 @@ def encuesta_eliminar(request, pk):
         messages.error(request, "No tienes permiso para eliminar encuestas.")
         return redirect("personas:check_profile")
     encuesta = get_object_or_404(Encuesta, pk=pk)
-    
-    # Opcional: solo permitir eliminar si está bloqueada
-    if encuesta.estado:
-        messages.error(request, "No se puede eliminar una encuesta activa. Debes desactivarla primero.")
-        return redirect("territorial_app:encuesta_detalle", pk=pk)
-    
+
     if request.method == "POST":
         titulo = encuesta.titulo
         encuesta.delete()

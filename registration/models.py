@@ -15,7 +15,9 @@ class Profile(models.Model):
         ordering = ['user__username']
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}" + (f" ({self.cargo})" if self.cargo else "")
+        full_name = f"{self.user.first_name} {self.user.last_name}".strip()
+        display = full_name if full_name else self.user.username
+        return f"{display} · {self.user.username}"
 
 # crear un Profile automáticamente
 @receiver(post_save, sender=User)

@@ -8,27 +8,69 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from .forms import UsuarioCrearForm, UsuarioEditarForm
 from .utils import solo_admin
+from core.utils import admin_o_direccion, admin_o_departamento
 from core.models import Incidencia
 
 @login_required
 def dashboard_admin(request):
     from core.models import Incidencia
+    estado_labels = {
+        "pendiente": "Pendiente",
+        "en_proceso": "En proceso",
+        "finalizada": "Finalizada",
+        "validada": "Validada",
+        "rechazada": "Rechazada",
+    }
     stats = {
         "usuarios_total": User.objects.count(),
         "incidencias_total": Incidencia.objects.count(),
     }
     estados = ["pendiente", "en_proceso", "finalizada", "validada", "rechazada"]
-    stats["incidencias_por_estado"] = {
-        e: Incidencia.objects.filter(estado=e).count() for e in estados
-    }
+    estado_data = []
+    colors = ["#ffd803", "#6ee7b7", "#38bdf8", "#c4b5fd", "#fca5a5"]
+    for idx, e in enumerate(estados):
+        estado_data.append(
+            {
+                "key": e,
+                "label": estado_labels.get(e, e.replace("_", " ").title()),
+                "count": Incidencia.objects.filter(estado=e).count(),
+                "color": colors[idx % len(colors)],
+            }
+        )
+    stats["incidencias_por_estado"] = estado_data
+    total_estados = sum(item["count"] for item in estado_data) or 1
+    segments = []
+    acc = 0.0
+    for idx, item in enumerate(estado_data):
+        pct = (item["count"] / total_estados) * 100
+        start = acc
+        end = acc + pct
+        segments.append(f"{colors[idx % len(colors)]} {start:.2f}% {end:.2f}%")
+        acc = end
+    stats["incidencias_por_estado_total"] = total_estados
+    stats["incidencias_pie_gradient"] = (
+        f"conic-gradient({', '.join(segments)})" if segments else "#f5f5f5"
+    )
+    stats["incidencias_palette"] = colors
     return render(request, "personas/dashboards/admin.html", {"stats": stats})
 
 @login_required
 def dashboard_territorial(request):
-    # Obtener las últimas 10 incidencias para mostrar en el dashboard
-    incidencias = Incidencia.objects.all().order_by('-creadoEl')[:10]
+    # Mostrar solo las incidencias asociadas al territorial (o todas si es admin)
+    roles = set(request.user.groups.values_list("name", flat=True))
+    es_admin = request.user.is_superuser or "Administrador" in roles
+
+    qs = Incidencia.objects.all()
+    if not es_admin:
+        try:
+            profile = request.user.profile
+            qs = qs.filter(territoriales__usuario=profile)
+        except Exception:
+            qs = Incidencia.objects.none()
+
+    incidencias = qs.order_by("-creadoEl")[:10]
     estados = ["pendiente", "en_proceso", "finalizada", "validada", "rechazada"]
-    stats = {e: Incidencia.objects.filter(estado=e).count() for e in estados}
+    stats = {e: qs.filter(estado=e).count() for e in estados}
     return render(request, "personas/dashboards/territorial.html", {
         'incidencias': incidencias,
         'stats': stats,
@@ -86,6 +128,7 @@ def dashboard_jefe(request):
     })
 
 @login_required
+@admin_o_direccion
 def dashboard_direccion(request):
     from core.models import Direccion, Incidencia
     try:
@@ -98,7 +141,7 @@ def dashboard_direccion(request):
     return render(request, "personas/dashboards/direccion.html", {"stats": stats, "direcciones": direcciones})
 
 @login_required
-@login_required
+@admin_o_departamento
 def dashboard_departamento(request):
     """
     Dashboard para usuarios del grupo Departamento.
@@ -274,17 +317,17 @@ def usuario_detalle(request, pk):
 @solo_admin
 def usuario_eliminar(request, pk):
     """
-    Eliminación suave: desactiva el usuario para impedir inicio de sesión.
-    Permite revertir con el toggle de activo.
+    Eliminación definitiva del usuario.
+    Si es el usuario actual, se bloquea la acción para evitar dejar la sesión inconsistente.
     """
     user = get_object_or_404(User, pk=pk)
     if request.method == "POST":
         if user == request.user:
             messages.error(request, "No puedes eliminar tu propio usuario estando conectado.")
             return redirect("personas:usuarios_lista")
-        user.is_active = False
-        user.save(update_fields=["is_active"])
-        messages.success(request, f"Usuario '{user.username}' desactivado.")
+        username = user.username
+        user.delete()
+        messages.success(request, f"Usuario '{username}' eliminado.")
         return redirect("personas:usuarios_lista")
     return render(request, "personas/usuario_confirm_delete.html", {"obj": user})
 

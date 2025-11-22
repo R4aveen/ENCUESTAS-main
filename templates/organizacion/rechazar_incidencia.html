@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary mb-3">← Volver al Dashboard</a>
+
+    <h2>Rechazar Incidencia</h2>
+
+    <div class="card mt-3 mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ incidencia.titulo }}</h5>
+            <p><strong>Descripción:</strong> {{ incidencia.descripcion }}</p>
+            <p><strong>Departamento:</strong> {{ incidencia.departamento.nombre_departamento }}</p>
+            <p><strong>Prioridad:</strong> {{ incidencia.prioridad }}</p>
+            <p><strong>Estado Actual:</strong> <span class="badge bg-warning">{{ incidencia.estado }}</span></p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>⚠️ Advertencia:</strong> Estás a punto de rechazar esta incidencia.
+        El usuario Territorial será notificado y deberá reasignarla correctamente.
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="motivo" class="form-label">Motivo del Rechazo *</label>
+            <textarea name="motivo" id="motivo" class="form-control" rows="4" required
+                placeholder="Ej: Esta incidencia corresponde a la Dirección de Tránsito, no a nuestro departamento."></textarea>
+            <div class="form-text">Explica por qué esta incidencia no corresponde a tu departamento.</div>
+        </div>
+
+        <button type="submit" class="btn btn-danger">❌ Rechazar Incidencia</button>
+        <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

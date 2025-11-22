@@ -18,6 +18,10 @@ urlpatterns = [
     path("departamento/<int:pk>/eliminar/", views.departamento_eliminar, name="departamento_eliminar"),
     path("departamento/<int:pk>/toggle/", views.departamento_toggle_estado, name="departamento_toggle_estado"),
     
-    # Asignación de cuadrillas
+    # Flujo de Departamento
+    path("derivar-incidencia/<int:pk>/", views.derivar_incidencia_view, name="derivar_incidencia"),
+    path("rechazar-incidencia/<int:pk>/", views.rechazar_incidencia_view, name="rechazar_incidencia"),
+    
+    # Legacy: redirige a derivar
     path("asignar-cuadrilla/<int:pk>/", views.asignar_cuadrilla_view, name="asignar_cuadrilla"),
 ]

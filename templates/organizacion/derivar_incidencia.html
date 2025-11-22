@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary mb-3">← Volver al Dashboard</a>
+
+    <h2>Derivar Incidencia a Cuadrilla</h2>
+
+    <div class="card mt-3 mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ incidencia.titulo }}</h5>
+            <p><strong>Descripción:</strong> {{ incidencia.descripcion }}</p>
+            <p><strong>Departamento:</strong> {{ incidencia.departamento.nombre_departamento }}</p>
+            <p><strong>Prioridad:</strong> {{ incidencia.prioridad }}</p>
+            <p><strong>Estado Actual:</strong> <span class="badge bg-warning">{{ incidencia.estado }}</span></p>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="cuadrilla_id" class="form-label">Selecciona la Cuadrilla</label>
+            <select name="cuadrilla_id" id="cuadrilla_id" class="form-select" required>
+                <option value="">-- Selecciona una cuadrilla --</option>
+                {% for cuadrilla in cuadrillas %}
+                <option value="{{ cuadrilla.id }}">{{ cuadrilla.nombre_cuadrilla }}</option>
+                {% endfor %}
+            </select>
+            <div class="form-text">Selecciona la cuadrilla que se encargará de resolver esta incidencia.</div>
+        </div>
+
+        <button type="submit" class="btn btn-success">✅ Derivar a Cuadrilla</button>
+        <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

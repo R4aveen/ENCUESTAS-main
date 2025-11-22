@@ -7,62 +7,50 @@
   <tr>
     <td valign="top" width="50%">
       <table border="0" cellpadding="6" cellspacing="0" width="100%">
-        <tr><td><b>Título:</b></td><td>{{ obj.titulo }}</td></tr>
-        <tr><td><b>Descripción:</b></td><td>{{ obj.descripcion }}</td></tr>
-        <tr><td><b>Estado:</b></td><td>{{ obj.estado|capfirst }}</td></tr>
-        <tr><td><b>Prioridad:</b></td><td>{{ obj.prioridad }}</td></tr>
-        <tr><td><b>Departamento:</b></td><td>{{ obj.departamento }}</td></tr>
-        <tr><td><b>Cuadrilla:</b></td><td>{% if obj.cuadrilla %}{{ obj.cuadrilla }}{% else %}Sin asignar{% endif %}</td></tr>
-        <tr><td><b>Fecha de cierre:</b></td><td>{% if obj.fecha_cierre %}{{ obj.fecha_cierre|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td></tr>
-        <tr><td><b>Vecino:</b></td><td>{{ obj.nombre_vecino }} ({{ obj.correo_vecino }}, {{ obj.telefono_vecino }})</td></tr>
+        <tr>
+          <td><b>Título:</b></td>
+          <td>{{ obj.titulo }}</td>
+        </tr>
+        <tr>
+          <td><b>Descripción:</b></td>
+          <td>{{ obj.descripcion }}</td>
+        </tr>
+        <tr>
+          <td><b>Estado:</b></td>
+          <td>{{ obj.estado|capfirst }}</td>
+        </tr>
+        <tr>
+          <td><b>Prioridad:</b></td>
+          <td>{{ obj.prioridad }}</td>
+        </tr>
+        <tr>
+          <td><b>Departamento:</b></td>
+          <td>{{ obj.departamento }}</td>
+        </tr>
+        <tr>
+          <td><b>Cuadrilla:</b></td>
+          <td>{% if obj.cuadrilla %}{{ obj.cuadrilla }}{% else %}Sin asignar{% endif %}</td>
+        </tr>
+        <tr>
+          <td><b>Fecha de cierre:</b></td>
+          <td>{% if obj.fecha_cierre %}{{ obj.fecha_cierre|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+        </tr>
+        <tr>
+          <td><b>Vecino:</b></td>
+          <td>{{ obj.nombre_vecino }} ({{ obj.correo_vecino }}, {{ obj.telefono_vecino }})</td>
+        </tr>
         {% if obj.motivo_rechazo %}
-        <tr><td><b>Motivo de rechazo:</b></td><td>{{ obj.motivo_rechazo }}</td></tr>
+        <tr>
+          <td><b>Motivo de rechazo:</b></td>
+          <td>{{ obj.motivo_rechazo }}</td>
+        </tr>
         {% endif %}
       </table>
     </td>
     <td valign="top" width="50%">
       {% if obj.multimedias.exists %}
-        {% for multimedia in obj.multimedias.all %}
-          <table border="1" cellpadding="6" cellspacing="0" width="100%">
-            <tr>
-              <th colspan="2">{{ multimedia.nombre }}</th>
-            </tr>
-            <tr>
-              <td valign="top" width="220">
-                <b>Tipo:</b> {{ multimedia.tipo|upper }}<br>
-                <b>Formato:</b> {{ multimedia.formato|upper }}<br>
-                <b>Subido:</b> {{ multimedia.creadoEl|date:"d/m/Y H:i" }}<br>
-              </td>
-              <td align="center">
-                {% if multimedia.tipo == 'image' %}
-                  <img src="{{ multimedia.url }}" alt="{{ multimedia.nombre }}" width="220"><br>
-                  <a href="{{ multimedia.url }}" target="_blank">Ver imagen grande</a>
-                {% elif multimedia.tipo == 'video' %}
-                  <video width="220" controls>
-                    <source src="{{ multimedia.url }}" type="video/{{ multimedia.formato }}">
-                    Tu navegador no soporta el video.
-                  </video><br>
-                  <a href="{{ multimedia.url }}" target="_blank">Ver video grande</a>
-                {% elif multimedia.tipo == 'application' and multimedia.formato|lower == 'pdf' %}
-                  <a href="{{ multimedia.url }}" target="_blank">Ver PDF</a>
-                {% else %}
-                  <a href="{{ multimedia.url }}" target="_blank">Descargar archivo</a>
-                {% endif %}
-              </td>
-            </tr>
-          </table>
-          <hr>
-        {% endfor %}
-      {% endif %}
-    </td>
-  </tr>
-</table>
-<hr>
-  <!-- Evidencias multimedia -->
-  <!-- {% if obj.multimedias.exists %}
-    <h3>Evidencias</h3>
-    {% for multimedia in obj.multimedias.all %}
-      <table border="1" cellpadding="6" cellspacing="0" style="margin-bottom:10px;">
+      {% for multimedia in obj.multimedias.all %}
+      <table border="1" cellpadding="6" cellspacing="0" width="100%">
         <tr>
           <th colspan="2">{{ multimedia.nombre }}</th>
         </tr>
@@ -74,48 +62,64 @@
           </td>
           <td align="center">
             {% if multimedia.tipo == 'image' %}
-              <img src="{{ multimedia.url }}" alt="{{ multimedia.nombre }}" width="300">
+            <img src="{{ multimedia.url }}" alt="{{ multimedia.nombre }}" width="220"><br>
+            <a href="{{ multimedia.url }}" target="_blank">Ver imagen grande</a>
             {% elif multimedia.tipo == 'video' %}
-              <video width="300" controls>
-                <source src="{{ multimedia.url }}" type="video/{{ multimedia.formato }}">
-                Tu navegador no soporta el video.
-              </video>
+            <video width="220" controls>
+              <source src="{{ multimedia.url }}" type="video/{{ multimedia.formato }}">
+              Tu navegador no soporta el video.
+            </video><br>
+            <a href="{{ multimedia.url }}" target="_blank">Ver video grande</a>
             {% elif multimedia.tipo == 'application' and multimedia.formato|lower == 'pdf' %}
-              <a href="{{ multimedia.url }}" target="_blank">Ver PDF</a>
+            <a href="{{ multimedia.url }}" target="_blank">Ver PDF</a>
             {% else %}
-              <a href="{{ multimedia.url }}" target="_blank">Descargar archivo</a>
+            <a href="{{ multimedia.url }}" target="_blank">Descargar archivo</a>
             {% endif %}
           </td>
         </tr>
       </table>
       <hr>
-    {% endfor %}
-  {% endif %} -->
+      {% endfor %}
+      {% endif %}
+    </td>
+  </tr>
+</table>
+<hr>
 
-  <!-- Botones de acción -->
+<!-- Botones de acción -->
   <div class="mt-3 d-flex gap-2">
     {% if user.is_superuser or user|has_group:"Administrador" %}
       <a href="{% url 'incidencias:incidencia_editar' obj.pk %}" class="btn btn-warning">✏️ Editar</a>
       <a href="{% url 'incidencias:incidencia_eliminar' obj.pk %}" class="btn btn-danger">🗑️ Eliminar</a>
     {% endif %}
-    
-    <!-- Botón para subir evidencia (solo para cuadrillas en estado "en_proceso") -->
+
+    {# Subir evidencia / finalizar para cuadrillas y territorio #}
     {% if obj.estado == 'en_proceso' and obj.cuadrilla %}
       {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" %}
         <a href="{% url 'incidencias:subir_evidencia' obj.pk %}" class="btn btn-success">
           📤 Subir evidencia
         </a>
-        
-        <!-- Botón para finalizar incidencia (solo si ya tiene evidencias) -->
         {% if obj.multimedias.exists %}
-          <a href="{% url 'incidencias:finalizar_incidencia' obj.pk %}" class="btn btn-primary" onclick="return confirm('¿Estás seguro de finalizar esta incidencia? El territorial podrá validar o rechazar tu trabajo.')">
+          <a href="{% url 'incidencias:finalizar_incidencia' obj.pk %}" class="btn btn-primary"
+            onclick="return confirm('¿Estás seguro de finalizar esta incidencia? El territorial podrá validar o rechazar tu trabajo.')">
             ✅ Finalizar incidencia
           </a>
         {% endif %}
       {% endif %}
     {% endif %}
-    
-    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-secondary">⬅️ Volver a la lista</a>
-  </div>
+
+  {% if user.is_superuser or user|has_group:"Administrador" %}
+  <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-secondary">⬅️ Volver a la lista</a>
+  {% elif user|has_group:"Territorial" %}
+  <a href="{% url 'personas:dashboard_territorial' %}" class="btn btn-secondary">⬅️ Volver al Dashboard</a>
+  {% elif user|has_group:"Departamento" %}
+  <a href="{% url 'personas:dashboard_departamento' %}" class="btn btn-secondary">⬅️ Volver al Dashboard</a>
+  {% elif user|has_group:"Jefe de Cuadrilla" %}
+  <a href="{% url 'personas:dashboard_jefeCuadrilla' %}" class="btn btn-secondary">⬅️ Volver al Dashboard</a>
+  {% elif user|has_group:"Dirección" %}
+  <a href="{% url 'personas:dashboard_direccion' %}" class="btn btn-secondary">⬅️ Volver al Dashboard</a>
+  {% else %}
+  <a href="{% url 'personas:check_profile' %}" class="btn btn-secondary">⬅️ Volver</a>
+  {% endif %}
 </div>
 {% endblock %}

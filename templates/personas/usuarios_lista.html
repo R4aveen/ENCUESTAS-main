@@ -40,7 +40,7 @@
           <a href="{% url 'core:usuario_detalle' u.id %}">Ver</a>
           {% if request.user.is_superuser or request.user|has_group:"Administrador" %}
             | <a href="{% url 'core:usuario_editar' u.id %}">Editar</a>
-            | <a href="{% url 'personas:usuario_eliminar' u.id %}">Eliminar</a>
+            | <a href="{% url 'personas:usuario_eliminar' u.id %}" class="text-danger">Eliminar</a>
             | {% if u.is_active %}
                 <form action="{% url 'core:usuario_toggle_activo' u.id %}" method="post" style="display:inline;">
                   {% csrf_token %}

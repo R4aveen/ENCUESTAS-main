@@ -5,6 +5,78 @@
 
 {% block content %}
 <div class="container">
+  <style>
+    .action-col {
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+    .btn-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-radius: 10px;
+      border: 1px solid #d7d7d7;
+      background: #fff;
+      color: #1f2937;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-chip:hover { transform: translateY(-1px); box-shadow: 0 14px 24px rgba(0,0,0,0.12); }
+    .btn-chip.primary { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
+    .btn-chip.warn { background: #f97316; color: #fff; border-color: #f97316; }
+    .btn-chip.danger { background: #ef4444; color: #fff; border-color: #ef4444; }
+    .btn-chip.success { background: #22c55e; color: #fff; border-color: #22c55e; }
+    .btn-chip.neutral { background: #f1f5f9; color: #0f172a; border-color: #e2e8f0; }
+    .btn-chip small { font-weight: 600; opacity: 0.9; }
+    .inc-table {
+      font-size: 0.95rem;
+    }
+    .inc-table th, .inc-table td {
+      padding: 10px 12px;
+      line-height: 1.2;
+      vertical-align: middle;
+    }
+    .inc-table tbody tr:nth-child(even) { background: #fafcff; }
+    details.dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    details.dropdown summary {
+      list-style: none;
+      cursor: pointer;
+      padding-right: 12px;
+      min-width: 120px;
+      justify-content: center;
+    }
+    details.dropdown[open] .dropdown-menu {
+      display: grid;
+    }
+    details.dropdown summary::-webkit-details-marker { display: none; }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+      padding: 8px;
+      min-width: 180px;
+      display: none;
+      z-index: 5;
+      gap: 6px;
+    }
+    .dropdown-menu a { width: 100%; justify-content: flex-start; }
+    .action-col { position: relative; }
+    @media (max-width: 768px) {
+      .action-col { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    }
+  </style>
+
   <h1>Panel Territorial</h1>
   <p>Bienvenido. Aquí puedes monitorear el trabajo en terreno y coordinar con jefes de cuadrilla.</p>
 
@@ -46,7 +118,7 @@
   </p>
 
   <!-- Tabla de incidencias -->
-  <table class="table table-striped align-middle mt-3">
+  <table class="table table-striped align-middle mt-3 inc-table">
     <thead>
       <tr>
         <th>ID</th>
@@ -95,36 +167,50 @@
               -
             {% endif %}
           </td>
-          <td class="d-flex gap-2">
-            <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-primary">👁️ Ver</a>
-            {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' %}
-              {% if user.is_superuser %}
-                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
-              {% elif 'Administrador' in user.groups.values_list.name %}
-                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
-              {% elif 'Jefe de Cuadrilla' in user.groups.values_list.name %}
-                <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
-              {% endif %}
-            {% endif %}
-            {% if incidencia.estado == 'en_proceso' and incidencia.cuadrilla %}
-              {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" %}
-                <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn btn-sm btn-success">📤 Subir evidencia</a>
-              {% endif %}
-              
-              <!-- Botón finalizar si ya tiene evidencias -->
-              {% if incidencia.multimedias.exists %}
-                {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" %}
-                  <a href="{% url 'incidencias:finalizar_incidencia' incidencia.id %}" class="btn btn-sm btn-primary" onclick="return confirm('¿Finalizar esta incidencia?')">✅ Finalizar</a>
+          <td class="action-col">
+            <details class="dropdown">
+              <summary class="btn-chip neutral" style="justify-content:space-between; min-width: 140px;">⋯ Acciones</summary>
+              <div class="dropdown-menu">
+                <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn-chip neutral">👁️ Ver</a>
+                
+                <!-- EDITAR: Permitir también en 'rechazada' para corregir -->
+                {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' or incidencia.estado == 'rechazada' %}
+                  {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" or user|has_group:"Territorial" %}
+                    <a href="{% url 'incidencias:incidencia_editar' incidencia.id %}?next={% url 'incidencias:incidencias_lista' %}" class="btn-chip primary">✏️ Editar</a>
+                  {% endif %}
                 {% endif %}
-              {% endif %}
-            {% endif %}
-            {% if 'Territorial' in user.groups.values_list.name %}
-              {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' %}
-                <a href="{% url 'territorial_app:validar_incidencia' incidencia.id %}" class="btn btn-sm btn-success">✅ Validar</a>
-                <a href="{% url 'territorial_app:rechazar_incidencia' incidencia.id %}" class="btn btn-sm btn-danger">❌ Rechazar</a>
-                <a href="{% url 'territorial_app:reasignar_incidencia' incidencia.id %}" class="btn btn-sm btn-warning">🔄 Reasignar</a>
-              {% endif %}
-            {% endif %}
+
+                <!-- SUBIR EVIDENCIA / FINALIZAR (Cuadrilla) -->
+                {% if incidencia.estado == 'en_proceso' and incidencia.cuadrilla %}
+                  {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" or user|has_group:"Territorial" %}
+                    <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn-chip warn">📤 Subir evidencia</a>
+                  {% endif %}
+                  {% if incidencia.multimedias.exists %}
+                    {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Jefe de Cuadrilla" or user|has_group:"Cuadrilla" or user|has_group:"Territorial" %}
+                      <a href="{% url 'incidencias:finalizar_incidencia' incidencia.id %}" class="btn-chip success" onclick="return confirm('¿Finalizar esta incidencia?')">✅ Finalizar</a>
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
+
+                <!-- VALIDAR / RECHAZAR / REASIGNAR (Territorial) -->
+                {% if user|has_group:"Territorial" or user.is_superuser or user|has_group:"Administrador" %}
+                  <!-- Validar/Rechazar solo cuando está FINALIZADA por la cuadrilla -->
+                  {% if incidencia.estado == 'finalizada' %}
+                    <a href="{% url 'territorial_app:validar_incidencia' incidencia.id %}" class="btn-chip success">✅ Validar</a>
+                    <a href="{% url 'territorial_app:rechazar_incidencia' incidencia.id %}" class="btn-chip danger">❌ Rechazar</a>
+                  {% endif %}
+                  
+                  <!-- Reasignar si está pendiente/en proceso -->
+                  {% if incidencia.estado == 'pendiente' or incidencia.estado == 'en_proceso' %}
+                     <a href="{% url 'territorial_app:reasignar_incidencia' incidencia.id %}" class="btn-chip warn">🔄 Reasignar</a>
+                  {% endif %}
+                {% endif %}
+
+                {% if user.is_superuser or user|has_group:"Administrador" or user|has_group:"Territorial" %}
+                  <a href="{% url 'incidencias:incidencia_eliminar' incidencia.id %}" class="btn-chip danger">🗑️ Eliminar</a>
+                {% endif %}
+              </div>
+            </details>
           </td>
         </tr>
       {% empty %}

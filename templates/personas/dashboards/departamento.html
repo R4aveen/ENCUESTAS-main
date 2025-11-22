@@ -3,54 +3,78 @@
 <h2>Dashboard{% if departamento %}: {{ departamento.nombre_departamento }}{% endif %}</h2>
 
 <table border="1" cellpadding="5" cellspacing="0" width="100%">
-<tr>
-<th width="33%">Pendientes<br><big><b>{{ total_pendientes }}</b></big><br><small>Para asignar</small></th>
-<th width="33%">En Proceso<br><big><b>{{ total_en_proceso }}</b></big><br><small>Asignadas</small></th>
-<th width="34%">Finalizadas<br><big><b>{{ total_finalizadas }}</b></big><br><small>Por validar</small></th>
-</tr>
+    <tr>
+        <th width="33%">Pendientes<br><big><b>{{ total_pendientes }}</b></big><br><small>Para asignar</small></th>
+        <th width="33%">En Proceso<br><big><b>{{ total_en_proceso }}</b></big><br><small>Asignadas</small></th>
+        <th width="34%">Finalizadas<br><big><b>{{ total_finalizadas }}</b></big><br><small>Por validar</small></th>
+    </tr>
 </table>
 
 {% if incidencias_pendientes %}
 <h3>Pendientes</h3>
 <table border="1" cellpadding="4" cellspacing="0" width="100%">
-<tr><th>ID</th><th>Titulo</th><th>Prioridad</th><th>Fecha</th><th>Acciones</th></tr>
-{% for inc in incidencias_pendientes %}
-<tr>
-<td>{{ inc.id }}</td>
-<td>{{ inc.titulo }}</td>
-<td>{{ inc.prioridad }}</td>
-<td>{{ inc.creadoEl|date:"d/m/Y H:i" }}</td>
-<td><a href="{% url 'incidencias:incidencia_detalle' inc.id %}">Ver</a> | <a href="{% url 'organizacion:asignar_cuadrilla' inc.id %}">Asignar Cuadrilla</a></td>
-</tr>
-{% endfor %}
+    <tr>
+        <th>ID</th>
+        <th>Titulo</th>
+        <th>Prioridad</th>
+        <th>Fecha</th>
+        <th>Acciones</th>
+    </tr>
+    {% for inc in incidencias_pendientes %}
+    <tr>
+        <td>{{ inc.id }}</td>
+        <td>{{ inc.titulo }}</td>
+        <td>{{ inc.prioridad }}</td>
+        <td>{{ inc.creadoEl|date:"d/m/Y H:i" }}</td>
+        <td><a href="{% url 'incidencias:incidencia_detalle' inc.id %}">Ver</a> | <a
+                href="{% url 'organizacion:derivar_incidencia' inc.id %}"
+                class="text-success"><strong>Derivar</strong></a> | <a
+                href="{% url 'organizacion:rechazar_incidencia' inc.id %}"
+                class="text-danger"><strong>Rechazar</strong></a></td>
+    </tr>
+    {% endfor %}
 </table>
 {% endif %}
 
 {% if incidencias_en_proceso %}
 <h3>En Proceso</h3>
 <table border="1" cellpadding="4" cellspacing="0" width="100%">
-<tr><th>ID</th><th>Titulo</th><th>Cuadrilla</th><th>Evidencias</th><th>Acciones</th></tr>
-{% for inc in incidencias_en_proceso %}
-<tr>
-<td>{{ inc.id }}</td>
-<td>{{ inc.titulo }}</td>
-<td>{{ inc.cuadrilla.nombre_cuadrilla }}</td>
-<td>{{ inc.multimedias.count }}</td>
-<td><a href="{% url 'incidencias:incidencia_detalle' inc.id %}">Ver</a></td>
-</tr>
-{% endfor %}
+    <tr>
+        <th>ID</th>
+        <th>Titulo</th>
+        <th>Cuadrilla</th>
+        <th>Evidencias</th>
+        <th>Acciones</th>
+    </tr>
+    {% for inc in incidencias_en_proceso %}
+    <tr>
+        <td>{{ inc.id }}</td>
+        <td>{{ inc.titulo }}</td>
+        <td>{{ inc.cuadrilla.nombre_cuadrilla }}</td>
+        <td>{{ inc.multimedias.count }}</td>
+        <td><a href="{% url 'incidencias:incidencia_detalle' inc.id %}">Ver</a></td>
+    </tr>
+    {% endfor %}
 </table>
 {% endif %}
 
 {% if cuadrillas %}
 <h3>Cuadrillas</h3>
 <table border="1" cellpadding="4" cellspacing="0" width="100%">
-<tr><th>Nombre</th><th>Usuario</th><th>Encargado</th></tr>
-{% for c in cuadrillas %}
-<tr><td>{{ c.nombre_cuadrilla }}</td><td>{{ c.usuario }}</td><td>{{ c.encargado }}</td></tr>
-{% endfor %}
+    <tr>
+        <th>Nombre</th>
+        <th>Usuario</th>
+        <th>Encargado</th>
+    </tr>
+    {% for c in cuadrillas %}
+    <tr>
+        <td>{{ c.nombre_cuadrilla }}</td>
+        <td>{{ c.usuario }}</td>
+        <td>{{ c.encargado }}</td>
+    </tr>
+    {% endfor %}
 </table>
 {% endif %}
 
-<p><a href="{% url 'incidencias:incidencias_lista' %}">Volver</a></p>
+
 {% endblock %}

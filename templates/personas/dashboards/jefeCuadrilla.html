@@ -16,7 +16,7 @@
   <hr>
 
   {% if cuadrillas %}
-  <h3>👷 Mis Cuadrillas ({{ cuadrillas.count }})</h3>
+  <h3>Mis Cuadrillas ({{ cuadrillas.count }})</h3>
   <div class="row mb-4">
     {% for cuadrilla in cuadrillas %}
       <div class="col-md-6 mb-3">
@@ -33,7 +33,7 @@
 
   <hr>
 
-  <h3>📋 Incidencias Pendientes ({{ incidencias_pendientes.count }})</h3>
+  <h3>Incidencias Pendientes ({{ incidencias_pendientes.count }})</h3>
   {% if incidencias_pendientes %}
   <table class="table table-striped mt-3">
     <thead>
@@ -63,7 +63,7 @@
 
   <hr>
 
-  <h3>🔧 Incidencias En Proceso ({{ incidencias_en_proceso.count }})</h3>
+  <h3>Incidencias En Proceso ({{ incidencias_en_proceso.count }})</h3>
   {% if incidencias_en_proceso %}
   <table class="table table-striped mt-3">
     <thead>
@@ -82,7 +82,7 @@
         <td>{{ incidencia.prioridad }}</td>
         <td>
           <a href="{% url 'incidencias:incidencia_detalle' incidencia.id %}" class="btn btn-sm btn-primary">Ver</a>
-          <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn btn-sm btn-success">📤 Subir evidencia</a>
+          <a href="{% url 'incidencias:subir_evidencia' incidencia.id %}" class="btn btn-sm btn-success">Subir evidencia</a>
         </td>
       </tr>
       {% endfor %}
@@ -95,8 +95,8 @@
   <hr>
 
   <div class="mt-4">
-    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">📋 Ver todas las Incidencias</a>
-    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">🚪 Cerrar Sesión</a>
+    <a href="{% url 'incidencias:incidencias_lista' %}" class="btn btn-primary">Ver todas las Incidencias</a>
+    <a href="{% url 'personas:cerrar_sesion' %}" class="btn btn-secondary">Cerrar Sesión</a>
   </div>
 </div>
 {% endblock %}

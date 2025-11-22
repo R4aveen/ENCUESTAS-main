@@ -32,6 +32,7 @@ class IncidenciaForm(forms.ModelForm):
         label="Estado"
     )
 
+
     prioridad = forms.ChoiceField(
         choices=PRIORIDAD_CHOICES,
         widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
@@ -39,12 +40,22 @@ class IncidenciaForm(forms.ModelForm):
         label="Prioridad"
     )
 
+    evidencia_inicial = forms.FileField(
+        label="Evidencia inicial (opcional)",
+        required=False,
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/*,video/*,application/pdf'
+        }),
+        help_text="Sube una foto o video del problema (Máx 10MB)."
+    )
+
     class Meta:
         model = Incidencia
         fields = [
             "titulo", "descripcion", "estado", "prioridad", "fecha_cierre",
             "latitud", "longitud", "direccion", "departamento","nombre_vecino","correo_vecino","telefono_vecino",
-            "cuadrilla", "tipo_incidencia",
+            "cuadrilla", "tipo_incidencia", "evidencia_inicial"
         ]
         widgets = {
             "titulo": forms.TextInput(attrs={"class": "form-control", "placeholder": "Título"}),
@@ -63,8 +74,11 @@ class IncidenciaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["direccion"].queryset = Direccion.objects.filter(estado=True)
-        self.fields['departamento'].queryset = Departamento.objects.filter(estado=True)
+        direcciones_qs = Direccion.objects.filter(estado=True)
+        departamentos_activos = Departamento.objects.filter(estado=True).select_related("direccion")
+
+        self.fields["direccion"].queryset = direcciones_qs
+        self.fields['departamento'].queryset = departamentos_activos
         self.fields['tipo_incidencia'].queryset = TipoIncidencia.objects.all().order_by("nombre_problema")
         self.fields['titulo'].required = True
         self.fields['descripcion'].required = True
@@ -100,12 +114,21 @@ class IncidenciaForm(forms.ModelForm):
                 pass
 
         # Filtrar departamentos por dirección seleccionada si existe
-        direccion_id = self.data.get("direccion") or (self.instance.departamento.direccion.pk if self.instance and self.instance.departamento and self.instance.departamento.direccion else None)
+        direccion_id = self.data.get("direccion") or (
+            self.instance.departamento.direccion.pk
+            if self.instance and self.instance.departamento and self.instance.departamento.direccion
+            else None
+        )
         if direccion_id:
             try:
-                self.fields['departamento'].queryset = Departamento.objects.filter(direccion_id=direccion_id, estado=True)
+                dep_filtrados = departamentos_activos.filter(direccion_id=direccion_id)
+                # Si no hay departamentos en esa dirección, mantener los activos para no dejar vacío el select
+                self.fields['departamento'].queryset = dep_filtrados if dep_filtrados.exists() else departamentos_activos
             except Exception:
-                self.fields['departamento'].queryset = Departamento.objects.filter(estado=True)
+                self.fields['departamento'].queryset = departamentos_activos
+        else:
+            # Sin dirección seleccionada, mostrar todos los activos
+            self.fields['departamento'].queryset = departamentos_activos
 
         if not self.instance or not getattr(self.instance, 'pk', None):
 
@@ -120,6 +143,21 @@ class IncidenciaForm(forms.ModelForm):
             raise ValidationError("Ya existe una incidencia con este título.")
         return titulo
 
+    def clean_evidencia_inicial(self):
+        archivo = self.cleaned_data.get('evidencia_inicial')
+        if archivo:
+            if archivo.size > 10 * 1024 * 1024:
+                raise ValidationError("El archivo no puede superar los 10MB")
+            
+            tipo_permitido = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'video/mp4', 'video/mpeg', 'video/quicktime',
+                'application/pdf'
+            ]
+            if archivo.content_type not in tipo_permitido:
+                raise ValidationError("Tipo de archivo no permitido (solo imágenes, videos o PDF)")
+        return archivo
+
     def clean_estado(self):
         nuevo_estado = self.cleaned_data.get("estado")
         if not nuevo_estado:
@@ -131,6 +169,10 @@ class IncidenciaForm(forms.ModelForm):
             return nuevo_estado
             
         estado_actual = self.instance.estado
+        # Permitir conservar el mismo estado al editar
+        if nuevo_estado == estado_actual:
+            return nuevo_estado
+
         if nuevo_estado not in self.TRANSICIONES_PERMITIDAS.get(estado_actual, []):
             raise ValidationError(
                 f"No se puede cambiar el estado de '{estado_actual}' a '{nuevo_estado}'. "
@@ -149,8 +191,9 @@ class IncidenciaForm(forms.ModelForm):
         cleaned = super().clean()
         direccion = cleaned.get("direccion")
         departamento = cleaned.get("departamento")
-        if direccion and departamento and departamento.direccion_id != direccion.id:
-            raise ValidationError("El departamento seleccionado no pertenece a la dirección elegida.")
+        # Si el departamento tiene dirección, sincronizamos y evitamos error
+        if departamento and departamento.direccion:
+            cleaned["direccion"] = departamento.direccion
         return cleaned
 
     def save(self, commit=True):
@@ -168,6 +211,35 @@ class IncidenciaForm(forms.ModelForm):
         
         if commit:
             incidencia.save()
+            
+            # Guardar evidencia inicial si existe
+            evidencia = self.cleaned_data.get('evidencia_inicial')
+            if evidencia:
+                from core.models import Multimedia
+                from django.conf import settings
+                from django.core.files.storage import default_storage
+                import os
+                from datetime import datetime
+                
+                # Crear directorio
+                upload_path = 'evidencias/'
+                os.makedirs(os.path.join(settings.MEDIA_ROOT, upload_path), exist_ok=True)
+                
+                # Guardar archivo
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                nombre_archivo = f"{timestamp}_{evidencia.name}"
+                ruta_completa = os.path.join(upload_path, nombre_archivo)
+                ruta_guardada = default_storage.save(ruta_completa, evidencia)
+                
+                # Crear registro Multimedia
+                Multimedia.objects.create(
+                    nombre=f"Evidencia Inicial - {evidencia.name}",
+                    url=settings.MEDIA_URL + ruta_guardada,
+                    tipo=evidencia.content_type.split('/')[0],
+                    formato=evidencia.name.split('.')[-1],
+                    incidencia=incidencia
+                )
+                
         return incidencia
 
 
