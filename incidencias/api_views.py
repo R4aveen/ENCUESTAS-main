@@ -94,6 +94,38 @@ class IncidenciaViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(incidencia)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["post"])
+    def finalizar(self, request, pk=None):
+        """
+        Finaliza una incidencia en estado 'en_proceso'.
+        Requiere que exista al menos una evidencia asociada.
+        Ruta: /api/incidencias/{pk}/finalizar/
+        """
+        incidencia = self.get_object()
+
+        # Validación: debe tener al menos una evidencia
+        if not incidencia.multimedias.exists():
+            return Response(
+                {"detail": "Debes subir al menos una evidencia antes de finalizar la incidencia."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if incidencia.estado != "en_proceso":
+            return Response(
+                {"detail": "Solo se pueden finalizar incidencias en estado 'en_proceso'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        comentario = (request.data.get("comentario") or "").strip()
+        if comentario:
+            incidencia.motivo_rechazo = comentario
+
+        incidencia.estado = "finalizada"
+        incidencia.save(update_fields=["estado", "motivo_rechazo", "actualizadoEl"])
+
+        serializer = self.get_serializer(incidencia)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["post"], url_path="subir-evidencia")
     def subir_evidencia(self, request, pk=None):
         """
